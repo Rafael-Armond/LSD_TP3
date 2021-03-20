@@ -64,6 +64,7 @@ begin
 				elsif (m='1')and(tot_it_p='0') then
 					NS <= Esp;
 				else NS <= Adc;
+			end if;
 			-------------------------------------------	
 			when Adc =>
 			-- estado de soma
@@ -77,8 +78,9 @@ begin
 				elsif (m='1')and(tot_it_p='0')then 
 					NS <=Esp;
 				elsif (m='0')and(tot_it_p='1')then 
-					NS <=Esp
+					NS <=Esp;
 				else NS <= Esp;
+			end if;
 			--------------------------------------------
 			when Disp =>
 			-- estado de dispensa
@@ -94,9 +96,9 @@ begin
 				elsif ()and() then
 					NS<=Ini;
 				else NS <=;
-				
+			end if;
 			when others =>
-			report "Estado indesejado"
+			report "Estado indesejado";
 			
 			NS<= Ini;
 		end  case;
