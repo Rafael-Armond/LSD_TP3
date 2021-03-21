@@ -91,11 +91,11 @@ begin
 			-- cond. mudança de estado
 				if (m='0')and(tot_it_p='0')then
 					NS<=Ini;
-				elsif ()and() then
+				elsif (m='1')and(tot_it_p='0') then
 					NS<=Ini;
-				elsif ()and() then
+				elsif (m='0')and(tot_it_p='1') then
 					NS<=Ini;
-				else NS <=;
+				else NS <=Ini;
 			end if;
 			when others =>
 			report "Estado indesejado";
@@ -103,4 +103,11 @@ begin
 			NS<= Ini;
 		end  case;
 	end process	comb_proc;
+			
+	with CS select
+	vec<=	"00" when Ini,
+		"01" when Esp,
+		"10" when Adc,
+		"11" when Disp,
+		"00" when others;
 end archRTL;
