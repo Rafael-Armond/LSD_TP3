@@ -247,19 +247,17 @@ use ieee.std_logic_1164.all;
 
 entity comparador_8bits is
     Port ( A,B : in std_logic_vector(0 to 7);
-           G,S,E: out std_logic);
+           S   : out std_logic);
 end comparador_8bits;
 
 architecture comp_arch of comparador_8bits is
   begin
     comp: process
      begin
-      if A=B then
-        G <= '0'; S <= '0'; E <= '1';
-      elsif A>B then
-        G <= '1'; S <= '0'; E <= '0';
-      elsif A<B then
-        G <= '0'; S <= '1'; E <= '0';
+      if A<B then
+        S <= '1';
+	  else 
+	    S <= '0';
       end if;
     end process comp;
 end comp_arch;
@@ -298,6 +296,11 @@ architecture datapath_arch of datapath is
 			 out1 : out std_logic_vector(7 downto 0));
 	end component;
 
+	component comparador_8bits is
+		Port ( A,B : in std_logic_vector(0 to 7);
+			   G,S,E: out std_logic);
+	end component;
+
 	signal c, d, tot_ld, tot_clr, tot_lt_s, clk, rst, clr : std_logic;
 	signal a,s : std_logic_vector(7 downto 0);
 
@@ -305,6 +308,9 @@ begin
 
 	to_fsm: maquinaRTL 
 	port map(tot_lt_s,c,); -- Não to sabendo mapear :(
+
+	to_comparador: comparador_8bits
+	port map();
 
 end datapath_arch ; -- arch
 
