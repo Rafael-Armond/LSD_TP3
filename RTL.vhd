@@ -3,15 +3,15 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 -- entity
 
-entity maquinaRTL is
+entity maquinaFSM is
 	port (	tot_it_p,m  : in std_logic;
 			clk, clr: in std_logic;
 			vec: in std_logic_vector (1 downto 0);
 			d,tot_ld,tot_clr: out std_logic);
-end maquinaRTL;
+end maquinaFSM;
 -- architecture
 
-architecture archRTL of maquinaRTL is
+architecture archFSM of maquinaFSM is
 	type state_type is (Ini,Esp,Adc,Disp);
 	
 	signal CS,NS : state_type;
@@ -104,12 +104,10 @@ begin
 			NS<=Ini;
 		end  case;
 	end process	comb_proc;
-end archRTL;
+end archFSM;
 
 -- Componente: Somador (8 bits)
 -- Half Adder
-library ieee;
-use ieee.std_logic_1164.all;
 
 entity half_adder is
     port (
@@ -172,8 +170,6 @@ begin
 end full_adder_arch;
 
 -- Ripple Carry Adder
-library ieee;
-use ieee.std_logic_1164.all;
 
 entity ripple_carry is
     port (
@@ -218,8 +214,6 @@ begin
 end ripple_carry_arch;
 
 -- Componente: Registrador (8 bits)
-library ieee;
-use ieee.std_logic_1164.all;
 
 entity registrador is 
     port(
@@ -263,19 +257,17 @@ architecture comp_arch of comparador_8bits is
 end comp_arch;
 
 -- Datapath + FSM Controller
-library ieee;
-use ieee.std_logic_1164.all;
 
-entity datapath is 
+entity RTL_machine is 
     port(a,s : in std_logic_vector(7 downto 0); -- Entradas de dados (a: valor da moeda, s: preço)
 		clk,tot_ld, tot_clr : in std_logic; 
 		tot_lt_s : out std_logic -- Total menor que s (preço)
 		);    
-end datapath;
+end RTL_machine;
 
-architecture datapath_arch of datapath is
+architecture RTL_machine_arch of RTL_machine is
 
-	component maquinaRTL is
+	component maquinaFSM
 		port (tot_it_p,m  : in std_logic;
 			  clk, clr: in std_logic;
 			  vec: in std_logic_vector (1 downto 0);
@@ -298,19 +290,29 @@ architecture datapath_arch of datapath is
 
 	component comparador_8bits is
 		Port ( A,B : in std_logic_vector(0 to 7);
-			   G,S,E: out std_logic);
+			   S: out std_logic);
 	end component;
 
 	signal c, d, tot_ld, tot_clr, tot_lt_s, clk, rst, clr : std_logic;
-	signal a,s : std_logic_vector(7 downto 0);
+	signal val_tot_moedas, valor_item : std_logic_vector(7 downto 0);
 
 begin
 
-	to_fsm: maquinaRTL 
-	port map(tot_lt_s,c,); -- Não to sabendo mapear :(
+	to_fsm: maquinaFSM
+	port map ( );
+
+	to_ripple_carry: ripple_carry
+	port map ( );
 
 	to_comparador: comparador_8bits
-	port map();
+	port map ( A => val_tot_moedas,
+			   B => valor_item,
+			   S => s );
+	
+	
 
-end datapath_arch ; -- arch
+	 to_regis: registrador
+	port map( );
+
+end RTL_machine_arch ; -- arch
 
