@@ -1,7 +1,9 @@
 v 3
-file . "Comparador_TB.vhd" "20210322173302.000" "20210322155445.886":
-  entity tb_comparator_vhdl at 4( 155) + 0 on 77;
-  architecture behavior of tb_comparator_vhdl at 10( 286) + 0 on 78;
+file . "Comparador_Design.vhd" "20210322200016.000" "20210322170513.891":
+  entity comparator_vhdl at 2( 25) + 0 on 79;
+  architecture comparator_structural of comparator_vhdl at 10( 198) + 0 on 80;
+  entity comparator_8bits at 19( 353) + 0 on 81;
+  architecture comparator_8bit_arch of comparator_8bits at 29( 551) + 0 on 82;
 file . "RTL.vhd" "20210322004734.000" "20210321214808.418":
   entity controllerfsm at 2( 31) + 0 on 27;
   architecture archrtl of controllerfsm at 13( 271) + 0 on 28;
@@ -17,6 +19,6 @@ file . "RTL.vhd" "20210322004734.000" "20210321214808.418":
   architecture datapath_arch of datapath at 281( 6344) + 0 on 40;
   entity rtl at 320( 7373) + 0 on 41;
   architecture rtl_arch of rtl at 331( 7567) + 0 on 42;
-file . "Comparador_Design.vhd" "20210322173740.000" "20210322155443.021":
-  entity comparator_vhdl at 1( 0) + 0 on 75;
-  architecture comparator_structural of comparator_vhdl at 9( 227) + 0 on 76;
+file . "Comparador_TB.vhd" "20210322173302.000" "20210322155445.886":
+  entity tb_comparator_vhdl at 4( 155) + 0 on 77;
+  architecture behavior of tb_comparator_vhdl at 10( 286) + 0 on 78;
