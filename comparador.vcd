@@ -1,0 +1,19 @@
+$date
+  Mon Mar 22 12:55:12 2021
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$var reg 8 ! a[7:0] $end
+$var reg 8 " b[7:0] $end
+$var reg 1 # s $end
+$var reg 1 $ teste_s $end
+$scope module dut $end
+$var reg 8 % a[7:0] $end
+$var reg 8 & b[7:0] $end
+$var reg 1 ' s $end
+$upscope $end
+$enddefinitions $end
