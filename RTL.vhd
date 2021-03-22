@@ -257,7 +257,7 @@ end comparador_8bits;
 
 architecture comp_arch of comparador_8bits is
   begin
-    comp: process
+    comp: process(A,B)
      begin
       if A<B then
         S <= '1';
