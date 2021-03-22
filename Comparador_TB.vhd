@@ -1,68 +1,48 @@
-library ieee;
-use ieee.std_logic_1164.all;
-use std.textio.all;
-use ieee.std_logic_textio.all;
-
-entity tb_comparador is 
-end tb_comparador;
-
-architecture tb of tb_comparador is
-
-    component comparador_8bits is
-        port (
-            A,B : in std_logic_vector(7 downto 0);
-            S : out std_logic  
+-- fpga4student.com: FPGA projects, Verilog projects, VHDL projects 
+-- VHDL project: VHDL code for a comparator 
+-- Testbench VHDL code for comparator
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+use ieee.numeric_std.all; 
+ENTITY tb_comparator_VHDL IS
+END tb_comparator_VHDL;
+ 
+ARCHITECTURE behavior OF tb_comparator_VHDL IS 
+ 
+    -- Component Declaration for the comparator in VHDL
+ 
+    COMPONENT comparator_VHDL
+    PORT(
+         A : IN  std_logic_vector(1 downto 0);
+         B : IN  std_logic_vector(1 downto 0);
+         A_less_B : OUT  std_logic
         );
-    end component;
+    END COMPONENT;
+   --Inputs
+   signal A : std_logic_vector(1 downto 0) := (others => '0');
+   signal B : std_logic_vector(1 downto 0) := (others => '0');
+  --Outputs
+   signal A_less_B : std_logic;
 
-    signal A : std_logic_vector(7 downto 0);
-    signal B : std_logic_vector(7 downto 0);
-    signal S : std_logic;
-
-    -- Sinais para teste
-    signal TESTE_S : std_logic;
-
-    file input_file : text;
-
-begin 
-    dut: entity work.comparador_8bits 
-        port map(
-            A => A,
-            B => B,
-            S => S
+BEGIN
+ -- Instantiate the comparator in VHDL
+   uut: comparator_VHDL 
+   PORT MAP (
+          A => A,
+          B => B,
+          A_less_B => A_less_B
         );
-    
-    tb_proc: process
-    variable input_file_read : line; 
-    variable input_file_col1 : std_logic_vector(7 downto 0); -- A
-    variable input_file_col2 : std_logic_vector(7 downto 0); -- B
-    variable input_file_col3 : std_logic; -- S
-    variable input_file_space : character; 
 
-    begin 
-        file_open(input_file, "file_comparador.txt", read_mode);
+   -- Stimulus process
+   stim_proc: process
+   begin 
+  -- create test cases for A_less_B
+  for i in 0 to 7 loop 
+           A <= std_logic_vector(to_unsigned(i,2));  
+           B <= std_logic_vector(to_unsigned(i+1,2));  
+           wait for 20 ns; 
+      end loop;
+      wait;
+   end process;
 
-        while not endfile(input_file) loop 
-            -- Entrada de dados do arquivo
-            readline(input_file,input_file_read);
-            read(input_file_read,input_file_col1);
-            read(input_file_read,input_file_space);
-            read(input_file_read,input_file_col2);
-            read(input_file_read,input_file_space);
-            read(input_file_read,input_file_col3);
-
-            -- Associação 
-            A <= input_file_col1;
-            B <= input_file_col2;
-            TESTE_S <= input_file_col3;
-
-            -- Verificação dos resultados
-            assert S = TESTE_S report "Soma nao e igual" severity note;
-
-            wait for 15 ns;
-        end loop;
-
-        file_close(input_file);
-        wait;
-    end process tb_proc;
-end tb;
+END;
