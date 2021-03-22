@@ -3,15 +3,14 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 -- entity
 
-entity maquinaRTL is
-	port (	tot_it_p,m  : in std_logic;
-			clk, clr: in std_logic;
-			vec: in std_logic_vector (1 downto 0);
-			d,tot_ld,tot_clr: out std_logic);
-end maquinaRTL;
+entity controllerFSM is
+	port (	tot_it_p,m       : in std_logic;
+			clk, clr         : in std_logic;
+			d,tot_ld,tot_clr : out std_logic);
+end controllerFSM;
 -- architecture
 
-architecture archRTL of maquinaRTL is
+architecture archRTL of controllerFSM is
 	type state_type is (Ini,Esp,Adc,Disp);
 	
 	signal CS,NS : state_type;
@@ -131,10 +130,10 @@ use ieee.std_logic_1164.all;
 
 entity full_adder is 
     port(
-        A,B : in std_logic;
+        A,B      : in std_logic;
         CARRY_IN : in std_logic;
-        SUM : out std_logic;
-        CARRY : out std_logic
+        SUM      : out std_logic;
+        CARRY    : out std_logic
     );
 end full_adder;
 
@@ -179,28 +178,34 @@ entity ripple_carry is
     port (
         A : in std_logic_vector(7 downto 0);
         B : in std_logic_vector(7 downto 0);
-        CARRY_IN : in std_logic;
         S : out std_logic_vector(7 downto 0);
         CARRY_OUT : out std_logic  
     );
 end ripple_carry;
 
 architecture ripple_carry_arch of ripple_carry is 
+	component half_adder is
+		port (
+			A,B : in std_logic;
+			SUM : out std_logic;
+			CARRY : out std_logic
+		);
+	end component half_adder; 
 
     component full_adder is 
     port(
-        A,B : in std_logic;
+        A,B      : in std_logic;
         CARRY_IN : in std_logic;
-        SUM : out std_logic;
-        CARRY : out std_logic
+        SUM      : out std_logic;
+        CARRY    : out std_logic
     );
     end component full_adder;
 
     signal C1, C2, C3, C4, C5, C6, C7 : std_logic;
 
 begin 
-    FA1: full_adder
-        port map(A(0), B(0), CARRY_IN, S(0), C1);
+    HA1: half_adder
+        port map(A(0), B(0), S(0), C1);
     FA2: full_adder
         port map(A(1), B(1), C1, S(1), C2);
     FA3: full_adder
@@ -223,20 +228,20 @@ use ieee.std_logic_1164.all;
 
 entity registrador is 
     port(
-        in1 : in std_logic_vector(7 downto 0);
-        load, clk, clr : in std_logic;
-        out1 : out std_logic_vector(7 downto 0)
+        in1       : in std_logic_vector(7 downto 0);
+        load, clr : in std_logic;
+        out1      : out std_logic_vector(7 downto 0)
     );
 end registrador;
 
 architecture reg_arch of registrador is 
 begin 
-    reg: process(clk,clr)
+    reg: process(in1,load,clr)
     begin 
         if clr = '1' then 
             out1 <= "00000000";
-        elsif rising_edge(clk) and load = '1' then 
-            out1 <= in1;
+        elsif load = '1' then 
+			out1 <= in1;
         end if;
     end process reg;
 end reg_arch;
@@ -262,55 +267,89 @@ architecture comp_arch of comparador_8bits is
     end process comp;
 end comp_arch;
 
--- Datapath + FSM Controller
+-- Datapath 
 library ieee;
 use ieee.std_logic_1164.all;
 
 entity datapath is 
-    port(a,s : in std_logic_vector(7 downto 0); -- Entradas de dados (a: valor da moeda, s: preço)
-		clk,tot_ld, tot_clr : in std_logic; 
-		tot_lt_s : out std_logic -- Total menor que s (preço)
+    port(a,s            : in std_logic_vector(7 downto 0); -- Entradas de dados (a: valor da moeda, s: preço)
+		tot_ld, tot_clr : in std_logic; 
+		tot_lt_s        : out std_logic -- Total menor que s (preço)
 		);    
 end datapath;
 
 architecture datapath_arch of datapath is
 
-	component maquinaRTL is
-		port (tot_it_p,m  : in std_logic;
-			  clk, clr: in std_logic;
-			  vec: in std_logic_vector (1 downto 0);
-			  d,tot_ld,tot_clr: out std_logic);
-	end component;
-
 	component ripple_carry is
 		port (A : in std_logic_vector(7 downto 0);
 			  B : in std_logic_vector(7 downto 0);
-			  CARRY_IN : in std_logic;
 			  S : out std_logic_vector(7 downto 0);
 			  CARRY_OUT : out std_logic);
 	end component;
 
 	component registrador is 
-		port(in1 : in std_logic_vector(7 downto 0);
-			 load, clk, clr : in std_logic;
-			 out1 : out std_logic_vector(7 downto 0));
+		port(in1       : in std_logic_vector(7 downto 0);
+			 load, clr : in std_logic;
+			 out1      : out std_logic_vector(7 downto 0));
 	end component;
 
 	component comparador_8bits is
 		Port ( A,B : in std_logic_vector(0 to 7);
-			   G,S,E: out std_logic);
+			   S   : out std_logic);
 	end component;
 
-	signal c, d, tot_ld, tot_clr, tot_lt_s, clk, rst, clr : std_logic;
-	signal a,s : std_logic_vector(7 downto 0);
+	signal out_registrador, out_somador, out_comparador : std_logic_vector(7 downto 0);
+	signal in1_somador : std_logic_vector(7 downto 0);
+	signal terra : std_logic;
 
 begin
 
-	to_fsm: maquinaRTL 
-	port map(tot_lt_s,c,); -- Não to sabendo mapear :(
+	tot: registrador
+	port map(out_somador,tot_ld,tot_clr,in1_somador);
 
-	to_comparador: comparador_8bits
-	port map();
+	adder: ripple_carry
+	port map(in1_somador,a,out_somador,terra);
 
-end datapath_arch ; -- arch
+	comp: comparador_8bits
+	port map(in1_somador, s, tot_lt_s);
 
+end datapath_arch ; 
+-- Fim Datapath
+
+-- RTL (Controller FSM + Datapath)
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity rtl is
+	port(
+		s,a       : in std_logic_vector(7 downto 0);
+		c,clk,clr : in std_logic;
+		d         : out std_logic
+	); 
+end rtl;
+
+architecture rtl_arch of rtl is
+
+	component datapath is 
+		port(a,s            : in std_logic_vector(7 downto 0); 
+			tot_ld, tot_clr : in std_logic; 
+			tot_lt_s        : out std_logic 
+			);    
+	end component;
+
+	component controllerFSM is
+		port (	tot_it_p,m       : in std_logic;
+				clk, clr         : in std_logic;
+				d,tot_ld,tot_clr : out std_logic);
+	end component;
+
+	signal tot_ld, tot_clr, tot_lt_s : std_logic;
+
+begin
+	dp: datapath
+	port map(s,a,tot_ld,tot_clr,tot_lt_s);
+
+	controladora: controllerFSM
+	port map(tot_lt_s,c,clk,clr,d,tot_ld,tot_clr); 
+
+end rtl_arch;
